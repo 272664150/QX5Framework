@@ -87,6 +87,5 @@ lint/tmp/
 # custom
 .DS_Store
 .idea
-gradle.properties
 gradlew
 gradlew.bat

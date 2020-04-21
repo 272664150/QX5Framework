@@ -1,5 +1,6 @@
 package com.example.qx5framework;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,12 +13,12 @@ import com.example.qx5framework.config.Constants;
 import com.example.qx5framework.view.X5WebView;
 
 /**
- * 腾讯X5内核加载H5的壳
+ * 腾讯X5加载H5的壳
  */
 public class WebViewActivity extends AppCompatActivity {
     private static final String TAG = WebViewActivity.class.getSimpleName();
 
-    private ViewGroup mViewParent;
+    private ViewGroup mContainerFl;
     private X5WebView mWebView;
 
     @Override
@@ -34,23 +35,37 @@ public class WebViewActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mViewParent = findViewById(R.id.fl_web);
+        mContainerFl = findViewById(R.id.fl_container);
         mWebView = new X5WebView(this);
-        mViewParent.addView(mWebView, new FrameLayout.LayoutParams(
+        mContainerFl.addView(mWebView, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
 
-        if (getIntent() == null) {
-            Log.e(TAG, "Intent is null");
+        Intent intent = getIntent();
+        if (intent == null) {
+            Log.e(TAG, "intent is null");
             return;
         }
 
-        String urlPath = getIntent().getStringExtra(Constants.KEY_URL_PATH);
+        String urlPath = intent.getStringExtra(Constants.KEY_URL_PATH);
         if (!TextUtils.isEmpty(urlPath)) {
             if (urlPath.startsWith("/storage")) {
                 urlPath = "file://" + urlPath;
             }
         }
         mWebView.loadUrl(urlPath);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mWebView != null) {
+            if (mContainerFl != null) {
+                mContainerFl.removeView(mWebView);
+            }
+            mWebView.removeAllViews();
+            mWebView.destroy();
+        }
     }
 }
